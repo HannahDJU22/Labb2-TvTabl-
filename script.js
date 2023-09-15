@@ -3,6 +3,8 @@ const menuList = document.querySelector(".menu");
 const channelHeading = document.getElementById('js-title');
 const channelSchedule = document.getElementById('js-schedule');
 const programTable = document.querySelector('#js-schedule');
+const loadingImage = document.querySelector(".hidden");
+
 
 function toggleMenu() {
     if (menuList.style.display === "none" || menuList.style.display === "") {
@@ -32,8 +34,6 @@ function toggleMenu() {
 }
 
 function setChannel(channelName) {
-    // createTable();
-
     switch (channelName) {
         case "SVT 1": {
             channelHeading.innerHTML = "SVT 1";
@@ -63,37 +63,51 @@ function setChannel(channelName) {
     }
 
 }
-function getChannelSchedule(channelName) {
-    fetch(`data/${channelName}.json`)
+async function getChannelSchedule(channelName) {
+
+    console.log(loadingImage);
+
+    loadingImage.classList.remove('hidden');
+
+    //Laddningsbilden visas bara vid första knapptrycket, när jag väljer ny kanal ser man att det dröjer men bilden visas inte
+
+    await fetch(`data/${channelName}.json`)
         .then((response) => response.json())
         .then((data) => renderData(data));
+
+    loadingImage.classList.add('hidden');
+    console.log(loadingImage);
 }
 
-// function renderData(scheduleData) {
-//     console.log("running renderData");
-//     channelSchedule.innerHTML = scheduleData;
-//     console.log(channelSchedule.innerHTML);
+//test-metod för att plocka ut timme och minut
+// function formatDate(dateFromAPI){
+// const newTime= new Date(dateFromAPI);
+// const hour=newTime.getHours();
+// const minute=newTime.getMinutes();
+
+// return `${hour}-${minute}`;
 // }
 
-// function createTable(){
-//     console.log("running createTable");
-//     console.log("programtable:" + programTable);
-//     programTable.innerHTML="<ul class='list-group list-group-flush'><li class='list-group-item show-previous'>Item 1</li><li class='list-group-item'>Item 2</li><li class='list-group-item'>Item 3</li></ul>";   
-//     console.log(programTable.innerHTML)
-// }
+
+//jag vill ha en funktion som formaterar start-strängen till att datum-objekt så att jag sedan kan plocka ut timme och minut
+
 
 function renderData(scheduleData) {
-    console.log(scheduleData);//detta är min array
+    //console.log(scheduleData);//detta är min array
 
     let myData = scheduleData.map((item) => {
-        return `<ul class='list-group list-group-flush'>
-    <li class='list-group-item'>${item.name}</li><li class='list-group-item'>${item.start}</li></ul>`;
+
+        const dateObj=new Date(item.start);
+        const hours=dateObj.getHours().toString().padStart(2, '0');
+        const minutes=dateObj.getMinutes().toString().padStart(2, '0');
+        const newTime=`${hours}:${minutes}`;
+        item.newTime=newTime;
+
+    console.log(newTime);
+
+        return `<li class='list-group-item'><strong>${item.newTime}</strong><div>${item.name}</div></li>`;
     })
-    .join("");
+        .join("");
 
-         programTable.innerHTML = "<li class='list-group-item show-previous'>Visa tidigare program</li>" + myData;
-
+    programTable.innerHTML = "<ul class ='list-group list-group-flush'><li class='list-group-item show-previous'>Visa tidigare program</li>" + myData + "</ul>";
 }
-
-
-
