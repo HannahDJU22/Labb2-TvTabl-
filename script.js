@@ -5,7 +5,11 @@ const channelHeading = document.getElementById('js-title');
 const channelSchedule = document.getElementById('js-schedule');
 const programTable = document.querySelector('#js-schedule');
 const loadingImage = document.querySelector(".hidden");
+const prevPrograms = document.querySelector(".show-previous");
 
+function clear() {
+    channelSchedule.innerHTML = "";
+}
 
 function toggleMenu() {
     if (menuList.style.display === "none" || menuList.style.display === "") {
@@ -23,7 +27,7 @@ function toggleMenu() {
         menuList.style.display = "none";
         menuIcon.classList.remove("fa-times");
         menuIcon.classList.add("fa-bars");
-        
+
         menuItems.forEach(function (listItem) {
             listItem.style.display = "none";
         });
@@ -65,51 +69,43 @@ function setChannel(channelName) {
             break;
         }
     }
-
-}
-
-function clear(){
-    channelSchedule.innerHTML = "";
 }
 
 async function getChannelSchedule(channelName) {
 
-    console.log(loadingImage);
-
     loadingImage.classList.remove('hidden');
-
-    //Laddningsbilden visas bara vid första knapptrycket, när jag väljer ny kanal ser man att det dröjer men bilden visas inte
 
     await fetch(`data/${channelName}.json`)
         .then((response) => response.json())
         .then((data) => renderData(data));
 
     loadingImage.classList.add('hidden');
-    console.log(loadingImage);
 }
 
 function renderData(scheduleData) {
     //console.log(scheduleData);//detta är min array
-    const myTimeNow= new Date();
+    const myTimeNow = new Date();
     
     //sorterar min array i tidsordning
     scheduleData.sort((itemA, itemB) => {
         const timeA = new Date(itemA.start);
         const timeB = new Date(itemB.start);
-        
+
         return timeA - timeB;
     });
 
-    //jag vill filtrera min array nu för att matcha mot dagens tid
-    //måste jämföra objekt mot objekt...
-
-    const filteredData = scheduleData.filter(item =>{
+    //filtrerar fram tider som är senare än NU.
+    //Gör om tablå-datumen till att matcha datumen NU
+    const filteredData = scheduleData.filter(item => {
         const programTime = new Date(item.start);
-        console.log(typeof programTime);
-        console.log(typeof myTimeNow);
+        programTime.setFullYear(myTimeNow.getFullYear());
+        programTime.setMonth(myTimeNow.getMonth());
+        programTime.setDate(myTimeNow.getDate());
         
-        return programTime<myTimeNow;
+        return programTime >= myTimeNow;
     });
+
+    console.log(filteredData);
 
     let myData = filteredData.map((item) => {
         //formaterar om tiden till timmar+minuter
@@ -118,14 +114,32 @@ function renderData(scheduleData) {
         const minutes = programTime.getMinutes().toString().padStart(2, '0');
         const newTime = `${hours}:${minutes}`;
         item.newTime = newTime;
-        console.log(typeof newTime);//ligger nu som sträng
-        
-        
+
         //mappar in datan i min tabell
         return `<li class='list-group-item'><strong>${item.newTime}</strong><div>${item.name}</div></li>`;
     })
         .join("");
-    
-        //skriver ut datan till html-sidan
+
+    //skriver ut datan till html-sidan
     programTable.innerHTML = "<ul class ='list-group list-group-flush'><li class='list-group-item show-previous'>Visa tidigare program</li>" + myData + "</ul>";
+}
+
+
+
+//så ska min ursprungliga array visas, den som heter scheduleData
+//skriv funktionen till fullo, hämta schedulaData och lägg en sort, även printen av ul och li
+//därefter kan jag testa att bryta ut dessa som egna metoder och sen kalla på dem i renderData samt nedan funktion
+
+function renderAllData() {
+
+
+}
+
+function showPreviousPrograms() {
+    //prevPrograms är mitt element för Visa tidigare program
+    //lägg till en addEventListener för knapptrycket på klassen .show-previous
+    prevPrograms.addEventListener('click', renderAllData);
+    console.log(prevPrograms);
+
+
 }
