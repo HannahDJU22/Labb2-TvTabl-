@@ -5,26 +5,30 @@ const channelHeading = document.getElementById('js-title');
 const channelSchedule = document.getElementById('js-schedule');
 const programTable = document.querySelector('#js-schedule');
 const loadingImage = document.querySelector(".hidden");
-const prevPrograms = document.querySelector(".show-previous");
 
 function clear() {
     channelSchedule.innerHTML = "";
 }
 
+let isMenuOpen = false;
+
 function toggleMenu() {
-    if (menuList.style.display === "none" || menuList.style.display === "") {
-        menuList.style.display = "block";
+    if (!isMenuOpen) {
         menuList.classList.add("menu--show");
+        menuList.style.transition = "left 0.5s ease-in-out";
+        menuList.style.left = "0";
+        isMenuOpen = true;
+        menuIcon.classList.remove("fa-bars");
+        menuIcon.classList.add("fa-times");
 
         menuItems.forEach(function (listItem) {
             listItem.style.display = "block";
         });
 
-        menuIcon.classList.remove("fa-bars");
-        menuIcon.classList.add("fa-times");
-
     } else {
-        menuList.style.display = "none";
+        menuList.style.transition = "left 0.5s ease-in-out";
+        menuList.style.left = "-100%";
+        isMenuOpen = false;
         menuIcon.classList.remove("fa-times");
         menuIcon.classList.add("fa-bars");
 
@@ -85,7 +89,7 @@ async function getChannelSchedule(channelName) {
 function renderData(scheduleData) {
     //console.log(scheduleData);//detta är min array
     const myTimeNow = new Date();
-    
+
     //sorterar min array i tidsordning
     scheduleData.sort((itemA, itemB) => {
         const timeA = new Date(itemA.start);
@@ -101,11 +105,9 @@ function renderData(scheduleData) {
         programTime.setFullYear(myTimeNow.getFullYear());
         programTime.setMonth(myTimeNow.getMonth());
         programTime.setDate(myTimeNow.getDate());
-        
+
         return programTime >= myTimeNow;
     });
-
-    console.log(filteredData);
 
     let myData = filteredData.map((item) => {
         //formaterar om tiden till timmar+minuter
@@ -124,22 +126,19 @@ function renderData(scheduleData) {
     programTable.innerHTML = "<ul class ='list-group list-group-flush'><li class='list-group-item show-previous'>Visa tidigare program</li>" + myData + "</ul>";
 }
 
-
-
 //så ska min ursprungliga array visas, den som heter scheduleData
 //skriv funktionen till fullo, hämta schedulaData och lägg en sort, även printen av ul och li
 //därefter kan jag testa att bryta ut dessa som egna metoder och sen kalla på dem i renderData samt nedan funktion
 
-function renderAllData() {
+const prevPrograms = document.querySelector(".show-previous");
+console.log(prevPrograms);
 
+function renderAllData() {
+    alert("du kommer i alla fall åt klicket");
 
 }
 
 function showPreviousPrograms() {
-    //prevPrograms är mitt element för Visa tidigare program
-    //lägg till en addEventListener för knapptrycket på klassen .show-previous
-    prevPrograms.addEventListener('click', renderAllData);
-    console.log(prevPrograms);
-
-
+    prevPrograms.addEventListener("click", renderAllData);
 }
+
